@@ -1,4 +1,14 @@
-# Golang CircleCI 2.0 configuration file
+setup_gcp_cloud_sdk: &setup_gcp_cloud_sdk
+  name: Setup GCP gsutil
+  command: |
+    apt-get update && apt-get install -y lsb-release
+    export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+    echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+    apt-get update && apt-get install -y google-cloud-sdk
+    echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
+    gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+    gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}# Golang CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
@@ -19,8 +29,10 @@ jobs:
     ####   /go/src/bitbucket.org/circleci/go-tool
     working_directory: /go/src/github.com/chrisleedotninja/go-simplehttp
     steps:
+      - run: *setup_gcp_cloud_sdk
       - checkout
 
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
       - run: go test -v ./...
+      - run: go build

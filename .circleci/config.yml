@@ -1,11 +1,11 @@
 setup_gcp_cloud_sdk: &setup_gcp_cloud_sdk
   name: Setup GCP gsutil
   command: |
-    apt-get update && apt-get install -y lsb-release
+    sudo apt-get update && sudo apt-get install -y lsb-release
     export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"
-    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-    echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-    apt-get update && apt-get install -y google-cloud-sdk
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+    echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+    sudo apt-get update && sudo apt-get install -y google-cloud-sdk
     echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
     gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
     gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}# Golang CircleCI 2.0 configuration file

@@ -32,7 +32,8 @@ func main() {
 // as the arguments.
 func handler(w http.ResponseWriter, r *http.Request) {
 	// For this case, we will always pipe "Hello World" into the response writer
-  json := "{"
+  version := "0.01"
+  json := "{\"version\":\"" + version + "\","
 	for _, e := range os.Environ() {
 		pair := strings.Split(e, "=")
 		json = json + "\"" + pair[0] + "\":" + "\"" + pair[1] + "\","

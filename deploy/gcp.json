@@ -1,0 +1,36 @@
+{
+  "builders": [
+    {
+      "type": "googlecompute",
+      "image_description": "go-simplehttp",
+      "image_name": "go-simplehttp",
+      "project_id": "sift-dev-infra-exp-spinnaker",
+      "region": "us-east4",
+      "source_image_family": "ubuntu-1810",
+      "ssh_username": "packer",
+      "subnetwork": "spinnaker-vpc",
+      "zone": "us-east4-b"
+    }
+  ],
+  "provisioners" : [
+    {
+      "type": "file",
+      "source": "go-simplehttp.service",
+      "destination": "/tmp/go-simplehttp.service"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sleep 60",
+        "sudo mkdir -p /opt/go-simplehttp",
+        "sudo /snap/bin/gsutil cp gs://sift-dev-infra-exp-spinnaker-test/go-httpsimple/go-simplehttp /tmp/go-simplehttp",
+        "sudo cp /tmp/go-simplehttp /opt/go-simplehttp/go-simplehttp",
+        "sudo cp /tmp/go-simplehttp.service /etc/systemd/system/go-simplehttp.service",
+        "sudo chmod +x /opt/go-simplehttp/go-simplehttp",
+        "sudo chmod +x /etc/systemd/system/go-simplehttp.service",
+        "sudo systemctl enable go-simplehttp.service",
+        "sudo systemctl start go-simplehttp.service"
+        ]
+    }
+  ]
+}

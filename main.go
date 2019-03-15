@@ -1,27 +1,23 @@
-//update
-// This is the name of our package
-// Everything with this package name can see everything
-// else inside the same package, regardless of the file they are in
 package main
 
-// These are the libraries we are going to use
-// Both "fmt" and "net" are part of the Go standard library
 import (
-	// "fmt" has methods for formatted I/O operations (like printing to the console)
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
-	// The "net/http" library has methods to implement HTTP clients and servers
-	"net/http"
 )
+
+var version = "1.1"
 
 func main() {
 	// The "HandleFunc" method accepts a path and a function as arguments
 	// (Yes, we can pass functions as arguments, and even trat them like variables in Go)
 	// However, the handler function has to have the appropriate signature (as described by the "handler" function below)
 	http.HandleFunc("/", handler)
+	http.HandleFunc("/env", envHandler)
 
 	// After defining our server, we finally "listen and serve" on port 8080
 	// The second argument is the handler, which we will come to later on, but for now it is left as nil,
@@ -33,8 +29,21 @@ func main() {
 // as the arguments.
 func handler(w http.ResponseWriter, r *http.Request) {
 	// For this case, we will always pipe "Hello World" into the response writer
-  version := "5"
-  json := "{\"version\":\"" + version + "\","
+	json := "{\"version\":\"" + version + "\"}"
+	errorCodes, errorExists := r.URL.Query()["errorcode"]
+
+	if errorExists {
+		if errorCode, err := strconv.Atoi(errorCodes[0]); err == nil {
+			w.WriteHeader(errorCode)
+		}
+	}
+	fmt.Fprintf(w, json)
+
+}
+
+func envHandler(w http.ResponseWriter, r *http.Request) {
+	// For this case, we will always pipe "Hello World" into the response writer
+	json := "{\"version\":\"" + version + "\","
 	for _, e := range os.Environ() {
 		pair := strings.Split(e, "=")
 		json = json + "\"" + pair[0] + "\":" + "\"" + pair[1] + "\","
@@ -45,7 +54,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, getDownstream(os.Getenv("DOWNSTREAM")))
 	}
 }
-
 func getDownstream(url string) string {
 	var netClient = &http.Client{
 		Timeout: time.Second * 10,

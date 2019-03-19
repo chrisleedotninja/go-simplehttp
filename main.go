@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var version = "1.5"
+var version = "1.6"
 
 func main() {
 	// The "HandleFunc" method accepts a path and a function as arguments
